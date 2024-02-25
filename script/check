@@ -1,0 +1,14 @@
+#!/bin/bash
+
+result=0
+
+for i in "$@"
+do
+  if grep -q -P "[\x00-\x19\x7f-\xff]" "$i"
+  then
+    echo "ERROR: $i contains non-text characters"
+    result=1
+  fi
+done
+
+exit $result

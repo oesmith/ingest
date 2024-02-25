@@ -1,0 +1,32 @@
+#!/usr/bin/env -S LANG=C sed -E -f
+
+# The data dump uses some exciting encodings -- mostly ISO 8859-1, but also
+# something else that I can't identify. This script should be run with LANG=C
+# to treat everything as binary so it can be cleaned up.
+
+# Remove non-breaking-space characters.
+s/[\xa0\xc2]//g
+
+# Replace uppercase accented E with plain E.
+s/\xc9|\xc3\x89/E/g
+
+# Collapse whitespace.
+s/\s\s+/ /g
+
+# Trim excess whitespace from fields.
+s/^ //g
+s/ $//g
+s/, /,/g
+s/ ,/,/g
+
+# Fix a double-escaped field.
+s/"""STREETZONE 50 2T 12"""""""/"STREETZONE 50 2T 12"""/g
+
+# Fix some known typos.
+s/BORO V6 4MOTION/BORA V6 4MOTION/g
+s/RG 5O0 CH/RG 500 CH/g
+s/AUSTIN-MORRIS/AUSTIN MORRIS/g
+s/HARLEY DAVIDSON/HARLEY-DAVIDSON/g
+s/IVECO FORD/IVECO-FORD/g
+s/MOTOR HISPANIA/MOTORHISPANIA/g
+s/MERCEDES BENZ/MERCEDES/g

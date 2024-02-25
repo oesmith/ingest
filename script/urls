@@ -1,0 +1,9 @@
+#!/bin/sh
+
+URL=https://www.gov.uk/government/statistical-data-sets/vehicle-licensing-statistics-data-files
+
+curl -s "$URL" \
+  | pup 'script[type="application/ld+json"] text{}' \
+  | jq -r 'select(.["@type"] == "Dataset").distribution[].contentUrl' \
+  | sort \
+  | grep -i -E 'veh0(120|124|160|220)'
