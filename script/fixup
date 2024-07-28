@@ -10,6 +10,9 @@ s/[\xa0\xc2]//g
 # Replace uppercase accented E with plain E.
 s/\xc9|\xc3\x89/E/g
 
+# Remove degree symbol.
+s/\xb0//g
+
 # Collapse whitespace.
 s/\s\s+/ /g
 

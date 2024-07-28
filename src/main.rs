@@ -226,7 +226,7 @@ impl Stats {
 
     fn merge_veh0124(&mut self, row: &dft::Veh0124) -> Result<(), Box<dyn Error>> {
         // TODO: Yearly breakdowns, not just current year.
-        if let Some(dft::OptionalNumber::Count(n)) = row.extra.get("2022") {
+        if let Some(dft::OptionalNumber::Count(n)) = row.extra.get("2023") {
             if *n <= 0 {
                 return Ok(());
             }
@@ -254,7 +254,7 @@ impl Stats {
 
     fn merge_veh0220(&mut self, row: &dft::Veh0220) -> Result<(), Box<dyn Error>> {
         // TODO: Yearly breakdowns, not just current year.
-        if let Some(n) = row.extra.get("2022") {
+        if let Some(n) = row.extra.get("2023") {
             if *n <= 0 {
                 return Ok(());
             }
