@@ -8,7 +8,7 @@
 s/[\xa0\xc2]//g
 
 # Replace uppercase accented E with plain E.
-s/\xc9|\xc3\x89/E/g
+s/\xc9|\xc3\x89|\xe2\x80/E/g
 
 # Remove degree symbol.
 s/\xb0//g
@@ -27,6 +27,9 @@ s/^ //g
 s/ $//g
 s/, /,/g
 s/ ,/,/g
+
+# Reformat headers
+s/,([0-9]{4}) Q([0-4])/,\1Q\2/g
 
 # Fix a double-escaped field.
 s/"""STREETZONE 50 2T 12"""""""/"STREETZONE 50 2T 12"""/g

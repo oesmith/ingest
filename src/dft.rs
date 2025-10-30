@@ -17,36 +17,46 @@ pub enum BodyType {
 
 #[derive(Deserialize, Debug, Clone)]
 pub enum FuelType {
+    #[serde(alias = "PETROL")]
     Petrol,
+    #[serde(alias = "DIESEL")]
     Diesel,
+    #[serde(alias = "GAS")]
     Gas,
-    #[serde(rename = "Battery electric")]
+    #[serde(
+        rename = "Battery electric",
+        alias = "BATTERY ELECTRIC"
+    )]
     BEV,
     #[serde(
         rename = "Hybrid electric (petrol)",
-        alias = "Hybrid electric (Petrol)"
+        alias = "Hybrid electric (Petrol)",
+        alias = "HYBRID ELECTRIC (PETROL)"
     )]
     PetrolHybrid,
     #[serde(
         rename = "Hybrid electric (diesel)",
-        alias = "Hybrid electric (Diesel)"
+        alias = "Hybrid electric (Diesel)",
+        alias = "HYBRID ELECTRIC (DIESEL)"
     )]
     DieselHybrid,
     #[serde(
         rename = "Plug-in hybrid electric (petrol)",
-        alias = "Plug-in hybrid electric (Petrol)"
+        alias = "Plug-in hybrid electric (Petrol)",
+        alias = "PLUG-IN HYBRID ELECTRIC (PETROL)"
     )]
     PetrolPluginHybrid,
     #[serde(
         rename = "Plug-in hybrid electric (diesel)",
-        alias = "Plug-in hybrid electric (Diesel)"
+        alias = "Plug-in hybrid electric (Diesel)",
+        alias = "PLUG-IN HYBRID ELECTRIC (DIESEL)"
     )]
     DieselPluginHybrid,
-    #[serde(rename = "Fuel cell electric")]
+    #[serde(rename = "Fuel cell electric", alias = "FUEL CELL ELECTRIC")]
     FuelCell,
-    #[serde(rename = "Range extended electric")]
+    #[serde(rename = "Range extended electric", alias = "RANGE EXTENDED ELECTRIC")]
     RangeExtender,
-    #[serde(rename = "Other fuel types", alias = "Other")]
+    #[serde(rename = "Other fuel types", alias = "Other", alias = "OTHER FUEL TYPES")]
     Other,
 }
 
