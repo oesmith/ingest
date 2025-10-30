@@ -13,7 +13,13 @@ s/\xc9|\xc3\x89/E/g
 # Remove degree symbol.
 s/\xb0//g
 
+# I'm not sure what this is, but it doesn't appear to add any value
+s/\xc3\x82//g
+s/\xc3\x83//g
+
 # Collapse whitespace.
+s/\x0d//g
+s/\t/ /g
 s/\s\s+/ /g
 
 # Trim excess whitespace from fields.
