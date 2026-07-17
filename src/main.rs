@@ -84,7 +84,6 @@ struct Model {
     pub generic_model: Link,
     #[serde(flatten)]
     pub stats: Stats,
-    index: usize,
 }
 
 impl Model {
@@ -93,7 +92,6 @@ impl Model {
         generic_model: &GenericModel,
         name: &str,
         slug: &str,
-        index: usize,
     ) -> Self {
         Model {
             name: name.to_string(),
@@ -101,7 +99,6 @@ impl Model {
             make: make.link(),
             generic_model: generic_model.link(),
             stats: Stats::new(),
-            index,
         }
     }
 
@@ -315,7 +312,7 @@ where
     Ok(())
 }
 
-fn to_blob(indices: &BTreeSet<usize>) -> Vec<u8> {
+fn to_blob(indices: &BTreeSet<u32>) -> Vec<u8> {
     let mut ret = Vec::with_capacity(indices.len() * 4);
     for index in indices {
         ret.push((index & 255) as u8);
@@ -330,8 +327,6 @@ struct Index {
     makes: BTreeMap<String, Make>,
     generic_models: BTreeMap<String, GenericModel>,
     models: BTreeMap<String, Model>,
-    keywords: BTreeMap<String, BTreeSet<usize>>,
-    metaphones: BTreeMap<String, BTreeSet<String>>,
 }
 
 impl Index {
@@ -340,8 +335,6 @@ impl Index {
             models: BTreeMap::new(),
             generic_models: BTreeMap::new(),
             makes: BTreeMap::new(),
-            keywords: BTreeMap::new(),
-            metaphones: BTreeMap::new(),
         }
     }
 
@@ -371,43 +364,50 @@ impl Index {
             .entry(generic_model_slug.clone())
             .or_insert_with(|| GenericModel::new(make, generic_model_name, &generic_model_slug));
         make.generic_models.insert(generic_model.link());
-        let next_model_index = self.models.len();
         let model = self.models.entry(model_slug.clone()).or_insert_with(|| {
             Model::new(
                 make,
                 generic_model,
                 model_name,
                 &model_slug,
-                next_model_index,
             )
         });
         generic_model.models.insert(model.link());
         update(&mut make.stats, &row)?;
         update(&mut generic_model.stats, &row)?;
         update(&mut model.stats, &row)?;
-        for word in model.keywords() {
-            self.keywords
-                .entry(word.clone())
-                .or_insert_with(|| BTreeSet::new())
-                .insert(model.index);
-            if word.len() > 4 {
-                if let Some(res) = double_metaphone(&word) {
-                    self.metaphones
-                        .entry(res.primary)
-                        .or_insert_with(|| BTreeSet::new())
-                        .insert(word.clone());
-                    self.metaphones
-                        .entry(res.alternate)
-                        .or_insert_with(|| BTreeSet::new())
-                        .insert(word);
-                }
-            }
-        }
 
         Ok(())
     }
 
     fn save(&self) -> Result<(), Box<dyn Error>> {
+        let mut keywords: BTreeMap<String, BTreeSet<u32>> = BTreeMap::new();
+        let mut metaphones: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+        {
+            let mut index: u32 = 1;
+            for model in self.models.values() {
+                for word in model.keywords() {
+                    keywords
+                        .entry(word.clone())
+                        .or_insert_with(|| BTreeSet::new())
+                        .insert(index);
+                    if word.len() > 4 {
+                        if let Some(res) = double_metaphone(&word) {
+                            metaphones
+                                .entry(res.primary)
+                                .or_insert_with(|| BTreeSet::new())
+                                .insert(word.clone());
+                            metaphones
+                                .entry(res.alternate)
+                                .or_insert_with(|| BTreeSet::new())
+                                .insert(word);
+                        }
+                    }
+                }
+                index += 1;
+            }
+        }
+
         let _ = std::fs::remove_file("howmanyleft.sqlite3");
         let db = Connection::open("howmanyleft.sqlite3")?;
         db.execute_batch(
@@ -436,19 +436,21 @@ impl Index {
         }
         {
             let mut stmt = db.prepare("INSERT INTO models VALUES (?1, ?2, ?3)")?;
+            let mut index = 1;
             for model in self.models.values() {
-                stmt.execute((&model.slug, &model.index, &serde_json::to_string(&model)?))?;
+                stmt.execute((&model.slug, &index, &serde_json::to_string(&model)?))?;
+                index += 1;
             }
         }
         {
             let mut stmt = db.prepare("INSERT INTO keywords VALUES (?1, ?2)")?;
-            for (word, indices) in &self.keywords {
-                stmt.execute((word, to_blob(indices)))?;
+            for (word, indices) in keywords {
+                stmt.execute((word, to_blob(&indices)))?;
             }
         }
         {
             let mut stmt = db.prepare("INSERT INTO metaphones VALUES (?1, ?2)")?;
-            for (metaphone, words) in &self.metaphones {
+            for (metaphone, words) in metaphones {
                 stmt.execute((
                     metaphone,
                     words.clone().into_iter().collect::<Vec<String>>().join("|"),
@@ -461,7 +463,6 @@ impl Index {
 
 fn parse() -> Result<Index, Box<dyn Error>> {
     let mut index = Index::new();
-
     read_table("tmp/csv/df_VEH0120_GB.csv", |r| {
         index.insert(r, |s, r| s.merge_veh0120_gb(r))
     })?;
