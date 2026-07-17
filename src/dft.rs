@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 #[derive(Deserialize, Debug, Clone)]
 pub enum BodyType {
+    #[serde(alias = "Crs")]
     Cars,
     Motorcycles,
     #[serde(rename = "Buses and coaches")]

@@ -12,7 +12,7 @@ mod dft;
 
 static KEYWORD_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"[a-z]+|[0-9]+").unwrap());
 
-static CURRENT_FULL_YEAR: &str = "2024";
+static CURRENT_FULL_YEAR: &str = "2025";
 
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Link {

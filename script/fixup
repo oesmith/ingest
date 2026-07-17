@@ -1,4 +1,4 @@
-#!/usr/bin/env -S LANG=C sed -E -f
+#!/usr/bin/env -S LANG=C gsed -E -f
 
 # The data dump uses some exciting encodings -- mostly ISO 8859-1, but also
 # something else that I can't identify. This script should be run with LANG=C
